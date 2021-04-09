@@ -20,11 +20,13 @@ def parser():
             if raw[i] == ">" and raw[i + 1] != "<":
                 act = ''
                 for j in range(len(raw)):
-                    act = act + raw[i + j + 2]
+                    if i + j + 1 >= len(raw):
+                        break
+                    act = act + raw[i + j + 1]
                     if act[j] == '<':
                         act = act[:len(act) - 1]
                         break
-                lines.append(act)
+                lines = lines + act
         some_text = lines
     words = nltk.word_tokenize(some_text)
     return words
