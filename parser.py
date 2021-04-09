@@ -9,14 +9,22 @@ def parser():
             some_text = text.read()
     else:
         some_text = input("Enter the text you want converted to speech: ")
+    url = ''
     url = input("Enter the url of the website you want spoken or press enter: ")
-    for u in url:
-        response = request.urlopen(u)
-        raw = raw + response.read().decode('utf8')
-
-    lines = nltk.line_tokenize(some_text)
+    print(url)
+    if url != '':
+        lines = ''
+        response = request.urlopen(url)
+        raw = response.read().decode('utf8')
+        for i in range(len(raw)):
+            if raw[i] == ">" and raw[i + 1] != "<":
+                act = ''
+                for j in range(len(raw)):
+                    act = act + raw[i + j + 2]
+                    if act[j] == '<':
+                        act = act[:len(act) - 1]
+                        break
+                lines.append(act)
+        some_text = lines
     words = nltk.word_tokenize(some_text)
     return words
-
-
-parser()
