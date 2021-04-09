@@ -27,15 +27,17 @@ class NLP:
                     print(exception)
                 for i in range(len(raw)):
                     if raw[i] == ">" and raw[i + 1] != "<":
+                        if raw[i - 8:i] == "<script>":
+                            continue
                         act = ''
-                    for j in range(len(raw)):
-                        if i + j + 1 >= len(raw):
-                            break
-                        act = act + raw[i + j + 1]
-                        if act[j] == '<':
-                            act = act[:len(act) - 1]
-                            break
-                    lines = lines + act
+                        for j in range(len(raw)):
+                            if i + j + 1 >= len(raw):
+                                break
+                            act = act + raw[i + j + 1]
+                            if act[j] == '<':
+                                act = act[:len(act) - 1]
+                                break
+                        lines = lines + act
                 some_text = lines
             elif option.lower() == "b":
                 some_text = input("Please enter the text you would like converted to speech.\n")
