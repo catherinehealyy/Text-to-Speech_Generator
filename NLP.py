@@ -16,12 +16,28 @@ class NLP:
         else:
             option = input("How would you like to input the text? \n A) Through a URL \n B) By typing it in \n")
             print(option)
-            if option == "A":
+            if option.lower() == "a":
+                url = ''
                 url = input("Please enter the url of the website you want spoken.\n")
-                # TODO: if the input is a url
-                    #TODO: check to make sure its a valid url
-                    #TODO: input the text data from the website to some_text
-            elif option == "B":
+                lines = ''
+                try:
+                    response = request.urlopen(url)
+                    raw = response.read().decode('utf8')
+                except request.HTTPError as exception:
+                    print(exception)
+                for i in range(len(raw)):
+                    if raw[i] == ">" and raw[i + 1] != "<":
+                        act = ''
+                    for j in range(len(raw)):
+                        if i + j + 1 >= len(raw):
+                            break
+                        act = act + raw[i + j + 1]
+                        if act[j] == '<':
+                            act = act[:len(act) - 1]
+                            break
+                    lines = lines + act
+                some_text = lines
+            elif option.lower() == "b":
                 some_text = input("Please enter the text you would like converted to speech.\n")
 
         self.words = nltk.word_tokenize(some_text)
