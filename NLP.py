@@ -26,8 +26,12 @@ class NLP:
                 except request.HTTPError as exception:
                     print(exception)
                 for i in range(len(raw)):
-                    if raw[i] == ">" and raw[i + 1] != "<":
-                        if raw[i - 8:i] == "<script>":
+                    if i + 1 >= len(raw):
+                        continue
+                    if raw[i] == ">" and raw[i + 1] != "<" and raw[i + 1] != ".":
+                        if raw[i - 7:i] == "<script":
+                            continue
+                        elif raw[i - 6:i] == "<style":
                             continue
                         act = ''
                         for j in range(len(raw)):
@@ -43,7 +47,7 @@ class NLP:
                 some_text = input("Please enter the text you would like converted to speech.\n")
 
         self.words = nltk.word_tokenize(some_text)
-
+        
     def structure_analyzer(self):
 
         for i in range(len(self.words)):
@@ -73,3 +77,4 @@ class NLP:
                 self.structured_words.append(new_str)
             else:
                 self.structured_words.append(self.words[i])
+
