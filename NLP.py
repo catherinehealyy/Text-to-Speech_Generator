@@ -14,8 +14,8 @@ class NLP:
     normalized_words = []
 
     def __init__(self):
-        if pathlib.Path("../../Documents/GitHub/Text-to-Speech_Generator/text_to_speech.txt").exists():
-            with open("../../Documents/GitHub/Text-to-Speech_Generator/text_to_speech.txt", "r") as text:
+        if pathlib.Path("text_to_speech.txt").exists():
+            with open("text_to_speech.txt", "r") as text:
                 some_text = text.read()
         else:
             option = input("How would you like to input the text? \n A) Through a URL \n B) By typing it in \n")
@@ -52,11 +52,22 @@ class NLP:
 
         self.words = nltk.word_tokenize(some_text)
 
+        self.structure_analyzer()
+        self.text_normalizer()
+
     def structure_analyzer(self):
-        p = re.compile('([A-Z]\.)+[A-Z]')
         # TODO: 1:30 - 2:30 change '-' to 'to'
+
+        p = re.compile('([A-Z]\.)+[A-Z]')
         skip_tag = False
+        prev_punc = False
         for i in range(len(self.words)):
+            if i == 0:
+                self.structured_words.append('<beginning>')
+            elif i != 0 and not prev_punc:
+                self.structured_words.append('<space>')
+            elif i != 0 and prev_punc:
+                prev_punc = False
             if skip_tag is False:
                 if self.words[i] == '.':
                     if p.match(self.structured_words[-1]):
@@ -67,27 +78,39 @@ class NLP:
                         for w in temp3: self.structured_words.append(w)
                         if i + 1 == len(self.words) or self.words[i + 1].isupper():
                             self.structured_words.append('<break,sent_end,2>')
-                        # TODO: account for abbreviations not just acronyms
+                        # TODO: account for abbreviations not just acronyms - what did i mean by this
                     else:
+                        self.structured_words.pop()
                         self.structured_words.append('<break,sent_end,2>')
+                        prev_punc = True
                 elif self.words[i] == '?':
                     for j in range(len(self.structured_words) - 1, 0, -1):
                         if self.structured_words[j][:2] == '<b':
                             self.structured_words.insert(j + 1, "<question>")
                             break
+                    self.structured_words.pop()
                     self.structured_words.append('<break,question,2>')
+                    prev_punc = True
                 elif self.words[i] == '!':
                     for j in range(len(self.structured_words) - 1, 0, -1):
                         if self.structured_words[j][-2:] == '2>':
                             self.structured_words.insert(j + 1, "<exclamation>")
                             break
+                    self.structured_words.pop()
                     self.structured_words.append('<break,exclamation,2>')
+                    prev_punc = True
                 elif self.words[i] == ',':
+                    self.structured_words.pop()
                     self.structured_words.append('<break,comma,1>')
+                    prev_punc = True
                 elif self.words[i] == ';':
+                    self.structured_words.pop()
                     self.structured_words.append('<break,semicolon,1.5>')
+                    prev_punc = True
                 elif self.words[i] == ':':
+                    self.structured_words.pop()
                     self.structured_words.append('<break,colon,1.5>')
+                    prev_punc = True
                 elif self.words[i][0] == "'":
                     del self.structured_words[-1]
                     new_str = self.words[i - 1] + self.words[i]
@@ -107,29 +130,32 @@ class NLP:
                     self.structured_words.pop()
                     for c in temp1: self.structured_words.append(c)
                     self.structured_words.append('at')
-                # TODO: should the tilde be at any point or only begining and end
+                # TODO: should the tilde be at any point or only beginning and end
                 elif self.words[i][0] == "~":
                     self.structured_words.append(self.words[i][0])
                     self.structured_words.append(self.words[i][1:])
                 elif self.words[i][-1] == "~":
-                    self.structured_words.append(self.words[i][:len(self.words[i]-1)])
+                    self.structured_words.append(self.words[i][:len(self.words[i] - 1)])
                     self.structured_words.append(self.words[i][-1])
-
-
-                # elif any(char == ":" for char in self.words[i]):
-                #     self.structured_words.append('<time>')
-                #     self.structured_words.append(self.words[i])
                 else:
                     self.structured_words.append(self.words[i])
             else:
                 skip_tag = False
 
+            if i == len(self.words) - 1:
+                self.structured_words.append('<end>')
+
     def text_normalizer(self):
         comp_symbol_dict = {
+            # TODO: add any more symbols
+            # TODO: look for a way to distinguish if it is one instance of an symbol or another # (pound, number, hastag)
             '~': ['tilde'],
             '#': ['pound']  # can be hashtag and number too
         }
         abbreviations = {
+            # TODO: add more abbreviations to the list
+            # TODO: look for a way to distinguish if it is one instance of an abreviaiton or another St. (street, saint)
+            # TODO: figure out something to do with the periods so we dont have to have repeats
             'Dr': ['doctor'],
             'Dr.': ['doctor'],
             'St': ['street'],  # or saint
@@ -166,6 +192,7 @@ class NLP:
 
         }
         TLD_dict = {
+            # TODO: add some more TLDs
             '.com': ['dot', 'c', 'o', 'm'],
             '.gov': ['dot', 'g', 'o', 'v'],
             '.net': ['dot', 'n', 'e', 't'],
@@ -184,6 +211,7 @@ class NLP:
             '.nl': ['dot', 'n', 'l'],
         }  # top level domain
         emails = {
+            # TODO: add some more emails
             'gmail': ['g', 'mail'],
             'yahoo': ['ya', 'hoo'],
             'comcast': ['com', 'cast']
@@ -194,30 +222,29 @@ class NLP:
                 if self.structured_words[i][:len(self.structured_words[i]) - 4] in emails:
                     for w in emails.get(
                             self.structured_words[i][:len(self.structured_words[i]) - 4]): self.normalized_words.append(
-                        w)
+                        w.lower())
                 else:
                     for c in self.structured_words[i][:len(self.structured_words[i]) - 4]: self.normalized_words.append(
-                        c)
-                for w in TLD_dict.get(self.structured_words[i][-4:]): self.normalized_words.append(w)
+                        c.lower())
+                for w in TLD_dict.get(self.structured_words[i][-4:]): self.normalized_words.append(w.lower())
             elif any(char.isdigit() for char in self.structured_words[i]) and self.structured_words[i][0] != "<":
                 new_words = self.num_to_words(self.structured_words[i])
                 # TODO: dates
                 for w in new_words:
-                    self.normalized_words.append(w)
-            elif self.structured_words[i] in abbreviations:  # if the word without hte . is in the abreviations dict
-                # TODO: Abbreviations issues: the decimal, squared?
-                for w in abbreviations.get(self.structured_words[i]): self.normalized_words.append(w)
-                # take off ending '.'  and have one big dic with everything
+                    self.normalized_words.append(w.lower())
+            elif self.structured_words[i] in abbreviations:
+                # TODO: Abbreviations issues: the decimal, what if they are squared
+                for w in abbreviations.get(self.structured_words[i]): self.normalized_words.append(w.lower())
             elif len(self.structured_words[i]) > 1 and RNC.parse(self.structured_words[i]) != False:
                 prevRNnum = str(roman.fromRoman((self.structured_words[i])))
                 new_words = self.num_to_words(prevRNnum.upper())
                 for w in new_words:
-                    self.normalized_words.append(w)
+                    self.normalized_words.append(w.lower())
             elif self.structured_words[i] in comp_symbol_dict:
-                for w in comp_symbol_dict.get(self.structured_words[i]): self.normalized_words.append(w)
+                for w in comp_symbol_dict.get(self.structured_words[i]): self.normalized_words.append(w.lower())
             # TODO: Strech goals- chemical symbols, greek symbols
             else:
-                self.normalized_words.append(self.structured_words[i])
+                self.normalized_words.append((self.structured_words[i]).lower())
 
     def num_to_words(self, word: str):
         temp_word = ''
@@ -230,7 +257,9 @@ class NLP:
             new_words = new_words + self.money_to_words(word)
         elif any(char == ":" for char in word):
             new_words = new_words + self.time_to_words(word)
-            # TODO: account for ratios check if the next word is AM/PM
+            # TODO: account for ratios
+            #  check by if the next word is AM/PM if it is then its time if not then its ratio
+            #  issue of military time with that
         elif any(char == "%" for char in word):
             new_words = new_words + self.percent_to_words(word)
         elif any(char == "/" for char in word):
