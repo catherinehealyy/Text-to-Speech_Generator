@@ -25,8 +25,8 @@ class SG:
 
     # THIS IS USED FOR TESTING
     def __init__(self):
-        self.normalized_words = ['<beginning>', 'hello', '<space>', 'there', '<break,comma,1>', 'how', '<space>', 'are',
-                                 '<space>', 'you', '<end>']
+        self.normalized_words = ['<beginning>', 'hello', 'there', '<break,comma,1>', 'how', 'are',
+                                 'you', 'doing', '<break,sent_end,2>', 'i', 'am', 'good', '<end>']
         # self.normalized_words = ['doctor', 'rabbits', 'email', 'is', 'i', 'l', 'u', 'v', 'c', 'a', 'r' 'r',
         # 'o' 't' 's', 'three', 'zero', 'five', 'at', 'g', 'mail', 'dot', 'c', 'o', 'm', '<break,sent_end,2>', 'you',
         # 'can', 'checkout', 'his', 'website', '<break,comma,1>', 'r', 'a', 'b', 'b', 'i', 't', 'd', 'r', 'dot', 'g',
@@ -38,6 +38,7 @@ class SG:
     #     self.normalized_words = n_w
 
     def text_to_phoneme(self):
+        skip = 0
         for w in self.normalized_words:  # get the token from normalized_words
             if w in self.cmud:
                 phone = self.cmud[w][0]  # convert tokens to its phoneme form
@@ -45,9 +46,28 @@ class SG:
                     phone[i] = re.sub("[^a-zA-Z\\s\-]", "", phone[i]).lower()
                 self.pronunciation_tokens.append(phone)  # add the phoneme form of the word to pronunciation_tokens
             elif w[0] == '<' and w[-1] == '>':
-                self.pronunciation_tokens.append(w)
+                self.pronunciation_tokens.append([w])
             else:
-                print(w, ' not in cmudict')
+                for i in range(len(w)):
+                    if skip > 0:
+                        skip -= 1
+                        continue
+                    try:
+                        phone = self.cmud[w[i:i+4].lower()][0]
+                        skip = 3
+                    except KeyError:
+                        try:
+                            phone = self.cmud[w[i:i+3].lower()][0]
+                            skip = 2
+                        except KeyError:
+                            try:
+                                phone = self.cmud[w[i:i+2].lower()][0]
+                                skip = 1
+                            except KeyError:
+                                phone = self.cmud[w[i].lower()][0]
+                    for i in range(len(phone)):
+                        phone[i] = re.sub("[^a-zA-Z\\s\-]", "", phone[i]).lower()
+                    self.pronunciation_tokens.append(phone)
                 # TODO: figure out what to do with words not in the cmu dictonary
                 #       Possibilities: should we get the root?, use the google converter?
 
@@ -55,15 +75,24 @@ class SG:
     def prosody_analyzer(self):
         temp = []
         for w in self.pronunciation_tokens:
-            if w[0] == '<' and w[-1] == '>':
-                temp.append("pau")
-                #temp.append(w)
+            if w[0] == "<beginning>" or w[0] == "<end>":
+                temp.append('pau')
+            elif w[0] == "<break,comma,1>":
+                temp.append('pau')
+                temp.append('pau')
+            elif w[0] == "<break,semicolon,1.5>" or w[0] == "<break,colon,1.5>":
+                temp.append('pau')
+                temp.append('pau')
+                temp.append('pau')
+            elif w[0] == "<break,sent_end,2>" or w[0] == "<break,question,2>" or w[0] == "<break,exclamation,2>":
+                temp.append('pau')
+                temp.append('pau')
+                temp.append('pau')
+                temp.append('pau')
             else:
                 for p in w:
                     temp.append(p)
-        print(temp)
         for i in range(len(temp)):
-            #if temp[i] != '<end>':
             if i != len(temp)-1:
                 self.post_prosody.append(temp[i] + '-' + temp[i+1])
         print(self.post_prosody)
@@ -86,7 +115,10 @@ def build_d():
     sound_dict = sound_dict_generator.Synth().diphones
     p_t = p_t_c.post_prosody
     for w in p_t:
-        array = np.append(array, (sound_dict[w]))
+        try:
+            array = np.append(array, (sound_dict[w]))
+        except KeyError:
+            pass
     print(array)
 
 if __name__ == "__main__":
