@@ -260,6 +260,7 @@ class NLP:
             # TODO: account for ratios
             #  check by if the next word is AM/PM if it is then its time if not then its ratio
             #  issue of military time with that
+            # completed in time_to_word!
         elif any(char == "%" for char in word):
             new_words = new_words + self.percent_to_words(word)
         elif any(char == "/" for char in word):
@@ -398,6 +399,17 @@ class NLP:
     def time_to_words(self, word: str):
         temp = ''
         final = []
+        if len(word) == 3:
+            temp1 = num2words(word[0])
+            temp2 = temp1.replace('-', ' ')
+            temp3 = nltk.word_tokenize(temp2)
+            for w in temp3: final.append(w)
+            final.append('over')
+            temp1 = num2words(word[2])
+            temp2 = temp1.replace('-', ' ')
+            # add the return of that to final
+            temp3 = nltk.word_tokenize(temp2)
+            for w in temp3: final.append(w)
         for d in word:
             if d.isdigit():
                 temp = temp + d
