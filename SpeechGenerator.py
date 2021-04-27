@@ -25,8 +25,9 @@ class SG:
 
     # THIS IS USED FOR TESTING
     def __init__(self):
-        self.normalized_words = ['<beginning>', 'hello', 'there', '<break,comma,1>', 'how', 'are',
-                                 'you', 'doing', '<break,sent_end,2>', 'i', 'am', 'good', '<end>']
+        self.normalized_words = ['<beginning>', '<question>', 'hello', 'there', '<break,comma,1>', 'how', 'are',
+                                 'you', 'doing', '<break,question,2>', 'i', 'am', 'good', '<break,sent_end,2>',
+                                 '<exclamation>', 'This', 'is', 'so', 'amazing', '<break,exclamation,2>', '<end>']
         # self.normalized_words = ['doctor', 'rabbits', 'email', 'is', 'i', 'l', 'u', 'v', 'c', 'a', 'r' 'r',
         # 'o' 't' 's', 'three', 'zero', 'five', 'at', 'g', 'mail', 'dot', 'c', 'o', 'm', '<break,sent_end,2>', 'you',
         # 'can', 'checkout', 'his', 'website', '<break,comma,1>', 'r', 'a', 'b', 'b', 'i', 't', 'd', 'r', 'dot', 'g',
@@ -87,14 +88,22 @@ class SG:
             elif w[0] == "<break,sent_end,2>" or w[0] == "<break,question,2>" or w[0] == "<break,exclamation,2>":
                 temp.append('pau')
                 temp.append('pau')
+                temp.append(w[0])
                 temp.append('pau')
-                temp.append('pau')
+            elif w[0] == "<question>" or w[0] == "<exclamation>":
+                temp.append(w[0])
             else:
                 for p in w:
                     temp.append(p)
         for i in range(len(temp)):
+            if temp[i] == "<exclamation>" or temp[i] == "<question>" or temp[i] == "<break,sent_end,2>" or temp[i] == "<break,question,2>" or temp[i] == "<break,exclamation,2>":
+                self.post_prosody.append(temp[i])
+                continue
             if i != len(temp)-1:
-                self.post_prosody.append(temp[i] + '-' + temp[i+1])
+                if temp[i+1] == "<exclamation>" or temp[i+1] == "<question>" or temp[i+1] == "<break,sent_end,2>" or temp[i+1] == "<break,question,2>" or temp[i+1] == "<break,exclamation,2>":
+                    self.post_prosody.append(temp[i] + '-' + temp[i + 2])
+                else:
+                    self.post_prosody.append(temp[i] + '-' + temp[i+1])
         print(self.post_prosody)
 
         # TODO: add the additional factors to the sounds to create normal sounding speech
@@ -111,29 +120,55 @@ class SG:
 
 
 def build_d():
-    global array
     sound_dict = sound_dict_generator.Synth().diphones
     p_t = p_t_c.post_prosody
+    temp = []
+    temps = sound_dict_generator.sound_dict(rate=16000)
+    flag = False
+    flag2 = False
     for w in p_t:
-        try:
-            array = np.append(array, (sound_dict[w]))
-        except KeyError:
-            pass
-    print(array)
+        if w == "<exclamation>" or flag:
+            flag = True
+            if w == "<break,exclamation,2>":
+                flag = False
+                temps.data = temp.astype(np.int16)
+                temps.change_speed(1.08)
+                temps.rescale(0.95)
+                temps.play()
+                temp = []
+            try:
+                temp = np.append(temp, (sound_dict[w]))
+            except:
+                pass
+        elif w == "<question>" or flag2:
+            flag2 = True
+            if w == "<break,question,2>":
+                flag2 = False
+                temps.data = temp.astype(np.int16)
+                temps.change_speed(1.04)
+                temps.rescale(0.7)
+                temps.play()
+                temp = []
+            try:
+                temp = np.append(temp, (sound_dict[w]))
+            except:
+                pass
+        else:
+            if w == "<break,sent_end,2>":
+                temps.data = temp.astype(np.int16)
+                temps.change_speed(1.04)
+                temps.rescale(0.5)
+                temps.play()
+                temp = []
+            try:
+                temp = np.append(temp, (sound_dict[w]))
+            except:
+                pass
 
 if __name__ == "__main__":
     p_t_c = SG()
     p_t_c.text_to_phoneme()
     p_t_c.prosody_analyzer()
-
-    out = sound_dict_generator.sound_dict(rate=16000)
-
-    array = []
-
     build_d()
-
-    out.data = array.astype(np.int16)
-
-    out.play()
 
 
