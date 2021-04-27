@@ -24,10 +24,10 @@ class SG:
     sound_dict = sound_dict_generator.Synth().diphones
 
     # THIS IS USED FOR TESTING
-    def __init__(self):
-        self.normalized_words = ['<beginning>', '<question>', 'hello', 'there', '<break,comma,1>', 'how', 'are',
-                                 'you', 'doing', '<break,question,2>', 'i', 'am', 'good', '<break,sent_end,2>',
-                                 '<exclamation>', 'This', 'is', 'so', 'amazing', '<break,exclamation,2>', '<end>']
+    #def __init__(self):
+        #self.normalized_words = ['<beginning>', '<question>', 'hello', 'there', 'professor', '<break,comma,1>', 'how', 'are',
+        #                         'you', 'doing', '<break,question,2>', 'i', 'am', 'good', '<break,sent_end,2>',
+        #                         '<exclamation>', 'This', 'is', 'so', 'amazing', '<break,exclamation,2>', '<end>']
         # self.normalized_words = ['doctor', 'rabbits', 'email', 'is', 'i', 'l', 'u', 'v', 'c', 'a', 'r' 'r',
         # 'o' 't' 's', 'three', 'zero', 'five', 'at', 'g', 'mail', 'dot', 'c', 'o', 'm', '<break,sent_end,2>', 'you',
         # 'can', 'checkout', 'his', 'website', '<break,comma,1>', 'r', 'a', 'b', 'b', 'i', 't', 'd', 'r', 'dot', 'g',
@@ -35,8 +35,10 @@ class SG:
         # 'volume', '<break,sent_end,2>', 'he', 'has', '<currency>', 'negative', 'three', 'dollars', 'in', 'his',
         # 'bank', 'account', '<break,sent_end,2>']
 
-    # def __init__(self, n_w: list):
-    #     self.normalized_words = n_w
+    def __init__(self, n_w: list):
+        self.normalized_words = n_w
+        self.text_to_phoneme()
+        self.prosody_analyzer()
 
     def text_to_phoneme(self):
         skip = 0
@@ -92,6 +94,8 @@ class SG:
                 temp.append('pau')
             elif w[0] == "<question>" or w[0] == "<exclamation>":
                 temp.append(w[0])
+            elif w[0] == "<space>":
+                continue
             else:
                 for p in w:
                     temp.append(p)
@@ -119,7 +123,7 @@ class SG:
         #  for ! and ?, should they be left in and the tone dealt with in build_d()??
 
 
-def build_d():
+def build_d(p_t_c: SG):
     sound_dict = sound_dict_generator.Synth().diphones
     p_t = p_t_c.post_prosody
     temp = []
@@ -164,11 +168,4 @@ def build_d():
                 temp = np.append(temp, (sound_dict[w]))
             except:
                 pass
-
-if __name__ == "__main__":
-    p_t_c = SG()
-    p_t_c.text_to_phoneme()
-    p_t_c.prosody_analyzer()
-    build_d()
-
 
