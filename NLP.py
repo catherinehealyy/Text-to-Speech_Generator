@@ -125,11 +125,6 @@ class NLP:
                     new_str = self.words[i - 1] + self.words[i]
                     self.structured_words.append('<percentage>')  # should we have an percentage tag
                     self.structured_words.append(new_str)
-                elif self.words[i][0] == "@":
-                    temp1 = self.structured_words[-1]
-                    self.structured_words.pop()
-                    for c in temp1: self.structured_words.append(c)
-                    self.structured_words.append('at')
                 # TODO: should the tilde be at any point or only beginning and end
                 elif self.words[i][0] == "~":
                     self.structured_words.append(self.words[i][0])
@@ -150,7 +145,20 @@ class NLP:
             # TODO: add any more symbols
             # TODO: look for a way to distinguish if it is one instance of an symbol or another # (pound, number, hastag)
             '~': ['tilde'],
-            '#': ['pound']  # can be hashtag and number too
+            '#': ['pound'],  # can be hashtag and number too
+            '"': ['quote'],
+            '<': ['less', 'then'],
+            '>': ['greater', 'than'],
+            '+': ['plus'],
+            '-': ['minus'],
+            '(': ['open', 'parenthesis'],
+            ')': ['closed', 'parenthesis'],
+            '@': ['at'],
+            '&': ['and'],
+            '[': ['open', 'bracket'],
+            ']': ['closed', 'bracket'],
+            '=': ['equals'],
+            '*': ['times']
         }
         abbreviations = {
             # TODO: add more abbreviations to the list
@@ -193,16 +201,16 @@ class NLP:
         }
         TLD_dict = {
             # TODO: add some more TLDs
-            '.com': ['dot', 'c', 'o', 'm'],
-            '.gov': ['dot', 'g', 'o', 'v'],
+            '.com': ['dot', 'com'],
+            '.gov': ['dot', 'gov'],
             '.net': ['dot', 'n', 'e', 't'],
             '.edu': ['dot', 'e', 'd', 'u'],
             '.de': ['dot', 'd', 'e'],
             '.icu': ['dot', 'i', 'c', 'u'],
             '.uk': ['dot', 'u', 'k'],
             '.ru': ['dot', 'r', 'u'],
-            '.info': ['dot', 'i', 'n', 'f', 'o'],
-            '.top': ['dot', 't', 'o', 'p'],
+            '.info': ['dot', 'info'],
+            '.top': ['dot', 'top'],
             '.xyz': ['dot', 'x', 'y', 'z'],
             '.tk': ['dot', 't', 'k'],
             '.cn': ['dot', 'c', 'n'],
@@ -217,7 +225,6 @@ class NLP:
             'comcast': ['com', 'cast']
         }
         for i in range(len(self.structured_words)):
-
             if self.structured_words[i][-4:] in TLD_dict:
                 if self.structured_words[i][:len(self.structured_words[i]) - 4] in emails:
                     for w in emails.get(
