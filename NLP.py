@@ -264,14 +264,94 @@ class NLP:
             new_words = new_words + self.percent_to_words(word)
         elif any(char == "/" for char in word):
             print('fraction')
-            # TODO: fraction
-            # new_words = []
-            # temp1 = num2words(word)
-            # temp2 = temp1.replace('-', ' ')
-            # # add the return of that to final
-            # temp3 = nltk.word_tokenize(temp2)
-            # for w in temp3: new_words.append(w)
-            # new_words = num2words(float(word))
+            count = 0
+            date = False
+            for char in word:
+                if char == "/":
+                    count += 1
+                if count == 2:
+                    date = True
+            if date:
+                month = True
+                day = False
+                days = 0
+                year = False
+                years = 0
+                for i in range(len(word)):
+                    if year:
+                        years += 1
+                    if i == len(word) - 1:
+                        if years == 2:
+                            if word[-years:] > 21:
+                                new_words.append('nine')
+                                new_words.append('teen')
+                                temp1 = num2words(word[-years:])
+                                temp2 = temp1.replace('-', ' ')
+                                temp3 = nltk.word_tokenize(temp2)
+                                for w in temp3: new_words.append(w)
+                            else:
+                                new_words.append('twenty')
+                                temp1 = num2words(word[-years:])
+                                temp2 = temp1.replace('-', ' ')
+                                temp3 = nltk.word_tokenize(temp2)
+                                for w in temp3: new_words.append(w)
+                        elif years == 4:
+                            temp1 = num2words(word[-years:-years-2])
+                            temp2 = temp1.replace('-', ' ')
+                            temp3 = nltk.word_tokenize(temp2)
+                            for w in temp3: new_words.append(w)
+                            temp1 = num2words(word[-years-2:])
+                            temp2 = temp1.replace('-', ' ')
+                            temp3 = nltk.word_tokenize(temp2)
+                            for w in temp3: new_words.append(w)
+                    if word[i] == "/" and day:
+                        temp1 = num2words(word[i-days:i], to='ordinal')
+                        temp2 = temp1.replace('-', ' ')
+                        temp3 = nltk.word_tokenize(temp2)
+                        for w in temp3: new_words.append(w)
+                        days = False
+                        year = True
+                    if day:
+                        days += 1
+                    if word[i] == "/" and month:
+                        if word[:i] == "1" or word[:i] == "01":
+                            new_words.append("january")
+                        elif word[:i] == "2" or word[:i] == "02":
+                            new_words.append("february")
+                        elif word[:i] == "3" or word[:i] == "03":
+                            new_words.append("march")
+                        elif word[:i] == "4" or word[:i] == "04":
+                            new_words.append("april")
+                        elif word[:i] == "5" or word[:i] == "05":
+                            new_words.append("may")
+                        elif word[:i] == "6" or word[:i] == "06":
+                            new_words.append("june")
+                        elif word[:i] == "7" or word[:i] == "07":
+                            new_words.append("july")
+                        elif word[:i] == "8" or word[:i] == "08":
+                            new_words.append("august")
+                        elif word[:i] == "9" or word[:i] == "09":
+                            new_words.append("september")
+                        elif word[:i] == "10":
+                            new_words.append("october")
+                        elif word[:i] == "11":
+                            new_words.append("november")
+                        elif word[:i] == "12":
+                            new_words.append("december")
+                        month = False
+                        day = True
+            else:
+                for i in range(len(word)):
+                    if word[i] == "/":
+                        temp1 = num2words(word[:i])
+                        temp2 = temp1.replace('-', ' ')
+                        temp3 = nltk.word_tokenize(temp2)
+                        for w in temp3: new_words.append(w)
+                        new_words.append('over')
+                        temp1 = num2words(word[i+1:])
+                        temp2 = temp1.replace('-', ' ')
+                        temp3 = nltk.word_tokenize(temp2)
+                        for w in temp3: new_words.append(w)
         else:
             temp1 = num2words(word)
             temp2 = temp1.replace('-', ' ')
