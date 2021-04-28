@@ -169,7 +169,9 @@ class NLP:
             'mr': ['mister'],
             'mr.': ['mister'],
             'mrs': ['misses'],
+            'mrs.': ['misses'],
             'ms': ['miss'],
+            'ms.': ['miss'],
             'St': ['street'],  # or saint
             'St.': ['street'],  # or saint
             'etc': ['et', 'cetera'],
