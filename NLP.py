@@ -158,7 +158,8 @@ class NLP:
             '[': ['open', 'bracket'],
             ']': ['closed', 'bracket'],
             '=': ['equals'],
-            '*': ['times']
+            '*': ['times'],
+            '-': ['dash']
         }
         abbreviations = {
             # TODO: add more abbreviations to the list
@@ -166,6 +167,10 @@ class NLP:
             # TODO: figure out something to do with the periods so we dont have to have repeats
             'Dr': ['doctor'],
             'Dr.': ['doctor'],
+            'mr': ['mister'],
+            'mr.': ['mister'],
+            'mrs': ['misses'],
+            'ms': ['miss'],
             'St': ['street'],  # or saint
             'St.': ['street'],  # or saint
             'etc': ['et', 'cetera'],
