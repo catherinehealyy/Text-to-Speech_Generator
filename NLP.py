@@ -3,9 +3,6 @@ import pathlib
 from urllib import request
 import re
 from num2words import num2words
-import RomanNumeralCheck as RNC
-import abbreviations
-import roman
 
 
 class NLP:
@@ -248,11 +245,6 @@ class NLP:
             elif self.structured_words[i] in abbreviations:
                 # TODO: Abbreviations issues: the decimal, what if they are squared
                 for w in abbreviations.get(self.structured_words[i]): self.normalized_words.append(w.lower())
-            elif len(self.structured_words[i]) > 1 and RNC.parse(self.structured_words[i]) != False:
-                prevRNnum = str(roman.fromRoman((self.structured_words[i])))
-                new_words = self.num_to_words(prevRNnum.upper())
-                for w in new_words:
-                    self.normalized_words.append(w.lower())
             elif self.structured_words[i] in comp_symbol_dict:
                 for w in comp_symbol_dict.get(self.structured_words[i]): self.normalized_words.append(w.lower())
             # TODO: Strech goals- chemical symbols, greek symbols
