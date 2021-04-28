@@ -48,7 +48,7 @@ class NLP:
                         lines = lines + act
                 some_text = lines
             elif option.lower() == "b":
-                some_text = input("Please enter the text you would like converted to speech.\n")
+                some_text = input("Please enter the text you would like converted to speech. End the input with a period.\n")
 
         self.words = nltk.word_tokenize(some_text)
 
