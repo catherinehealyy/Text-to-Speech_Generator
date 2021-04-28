@@ -150,7 +150,6 @@ class NLP:
             '<': ['less', 'then'],
             '>': ['greater', 'than'],
             '+': ['plus'],
-            '-': ['minus'],
             '(': ['open', 'parenthesis'],
             ')': ['closed', 'parenthesis'],
             '@': ['at'],
