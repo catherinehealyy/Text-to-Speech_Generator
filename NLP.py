@@ -48,7 +48,6 @@ class NLP:
                 some_text = input("Please enter the text you would like converted to speech. End the input with a period.\n")
 
         self.words = nltk.word_tokenize(some_text)
-
         self.structure_analyzer()
         self.text_normalizer()
 
@@ -129,6 +128,18 @@ class NLP:
                 elif self.words[i][-1] == "~":
                     self.structured_words.append(self.words[i][:len(self.words[i] - 1)])
                     self.structured_words.append(self.words[i][-1])
+                elif any(char.isalpha() for char in self.words[i][0]):
+                    mark = False
+                    for j in range(len(self.words[i])):
+                        if self.words[i][j] == "-":
+                            temp1 = self.words[i][:j]
+                            temp2 = self.words[i][j+1:]
+                            self.structured_words.append(temp1)
+                            self.structured_words.append(temp2)
+                            mark = True
+                            break
+                    if not mark:
+                        self.structured_words.append(self.words[i])
                 else:
                     self.structured_words.append(self.words[i])
             else:
