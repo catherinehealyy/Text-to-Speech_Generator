@@ -67,7 +67,10 @@ class SG:
                                 phone = self.cmud[w[i:i+2].lower()][0]
                                 skip = 1
                             except KeyError:
-                                phone = self.cmud[w[i].lower()][0]
+                                try:
+                                    phone = self.cmud[w[i].lower()][0]
+                                except:
+                                    pass
                     for i in range(len(phone)):
                         phone[i] = re.sub("[^a-zA-Z\\s\-]", "", phone[i]).lower()
                     self.pronunciation_tokens.append(phone)
