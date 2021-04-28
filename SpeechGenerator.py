@@ -80,6 +80,8 @@ class SG:
         for w in self.pronunciation_tokens:
             if w[0] == "<beginning>" or w[0] == "<end>":
                 temp.append('pau')
+                if w[0] == "<end>":
+                    temp.append(w[0])
             elif w[0] == "<break,comma,1>":
                 temp.append('pau')
                 temp.append('pau')
@@ -104,8 +106,11 @@ class SG:
                 self.post_prosody.append(temp[i])
                 continue
             if i != len(temp)-1:
-                if temp[i+1] == "<exclamation>" or temp[i+1] == "<question>" or temp[i+1] == "<break,sent_end,2>" or temp[i+1] == "<break,question,2>" or temp[i+1] == "<break,exclamation,2>":
-                    self.post_prosody.append(temp[i] + '-' + temp[i + 2])
+                if temp[i+1] == "<exclamation>" or temp[i+1] == "<question>" or temp[i+1] == "<break,sent_end,2>" or temp[i+1] == "<break,question,2>" or temp[i+1] == "<break,exclamation,2>" or temp[i+1] == "<end>":
+                    if temp[i+1] == "<end>":
+                        self.post_prosody.append(temp[i+1])
+                    else:
+                        self.post_prosody.append(temp[i] + '-' + temp[i + 2])
                 else:
                     self.post_prosody.append(temp[i] + '-' + temp[i+1])
         print(self.post_prosody)
@@ -158,7 +163,7 @@ def build_d(p_t_c: SG):
             except:
                 pass
         else:
-            if w == "<break,sent_end,2>":
+            if w == "<break,sent_end,2>" or w == "<end>":
                 temps.data = temp.astype(np.int16)
                 temps.change_speed(1.04)
                 temps.rescale(0.5)
