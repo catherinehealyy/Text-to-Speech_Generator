@@ -101,6 +101,30 @@ class sound_dict(pyaudio.PyAudio):
         self.ostream.write(array.tostring())
         self.chunk_index += 1
 
+    def rescale(self, val):
+        # Check argument passed
+        if not 0 <= val <= 1:
+            raise ValueError("Expected scaling factor between 0 and 1")
+
+        # find the biggest peak
+        # peak = 0
+        # length = self.data.shape[0]
+        # for i in range(0, length-1):
+        #     if abs(self.data[i]) > peak:
+        #         peak = abs(self.data[i])
+
+        peak = np.max(np.abs(self.data))
+
+        # Calculate the rescaling factor
+        rescale_factor = val * MAX_AMP / peak
+
+        self.data = (self.data * rescale_factor).astype(self.nptype)
+
+    def change_speed(self, factor):
+        indxs = np.round(np.arange(0, len(self.data), factor))
+        indxs = indxs[indxs < len(self.data)].astype(int)
+        self.data = self.data[indxs]
+
     def test(self):
         print("test")
 
@@ -110,7 +134,7 @@ class sound_dict(pyaudio.PyAudio):
 class Synth:
     def __init__(self):
         self.diphones = {}
-        self.diphones_wavs = self.create_dict()
+        self.create_dict()
 
     def create_dict(self):
         if not pathlib.Path("diphones").exists():
