@@ -271,7 +271,6 @@ class NLP:
         elif any(char == "%" for char in word):
             new_words = new_words + self.percent_to_words(word)
         elif any(char == "/" for char in word):
-            print('fraction')
             count = 0
             date = False
             for char in word:
@@ -290,7 +289,7 @@ class NLP:
                         years += 1
                     if i == len(word) - 1:
                         if years == 2:
-                            if word[-years:] > 21:
+                            if int(word[-years:]) > 21:
                                 new_words.append('nine')
                                 new_words.append('teen')
                                 temp1 = num2words(word[-years:])
@@ -304,11 +303,11 @@ class NLP:
                                 temp3 = nltk.word_tokenize(temp2)
                                 for w in temp3: new_words.append(w)
                         elif years == 4:
-                            temp1 = num2words(word[-years:-years-2])
+                            temp1 = num2words(word[-years:-(years-2)])
                             temp2 = temp1.replace('-', ' ')
                             temp3 = nltk.word_tokenize(temp2)
                             for w in temp3: new_words.append(w)
-                            temp1 = num2words(word[-years-2:])
+                            temp1 = num2words(word[-(years-2):])
                             temp2 = temp1.replace('-', ' ')
                             temp3 = nltk.word_tokenize(temp2)
                             for w in temp3: new_words.append(w)
@@ -417,6 +416,7 @@ class NLP:
             # add the return of that to final
             temp3 = nltk.word_tokenize(temp2)
             for w in temp3: final.append(w)
+            return final
         for d in word:
             if d.isdigit():
                 temp = temp + d
