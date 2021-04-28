@@ -10,7 +10,6 @@ Waveform producer: take all the information generated and create the waveforms r
 output for the inputted text.
 
 """
-import nltk
 from nltk.stem.porter import *
 from nltk.corpus import cmudict
 import sound_dict_generator
@@ -56,21 +55,25 @@ class SG:
                         skip -= 1
                         continue
                     try:
-                        phone = self.cmud[w[i:i+4].lower()][0]
-                        skip = 3
-                    except KeyError:
+                        phone = self.cmud[w[i:i+5].lower()][0]
+                        skip = 4
+                    except:
                         try:
-                            phone = self.cmud[w[i:i+3].lower()][0]
-                            skip = 2
-                        except KeyError:
+                            phone = self.cmud[w[i:i+4].lower()][0]
+                            skip = 3
+                        except:
                             try:
-                                phone = self.cmud[w[i:i+2].lower()][0]
-                                skip = 1
-                            except KeyError:
+                                phone = self.cmud[w[i:i+3].lower()][0]
+                                skip = 2
+                            except:
                                 try:
-                                    phone = self.cmud[w[i].lower()][0]
+                                    phone = self.cmud[w[i:i+2].lower()][0]
+                                    skip = 1
                                 except:
-                                    pass
+                                    try:
+                                        phone = self.cmud[w[i].lower()][0]
+                                    except:
+                                        pass
                     for i in range(len(phone)):
                         phone[i] = re.sub("[^a-zA-Z\\s\-]", "", phone[i]).lower()
                     self.pronunciation_tokens.append(phone)
