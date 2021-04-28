@@ -1,10 +1,8 @@
 import pyaudio
 import numpy as np
 import wave
-import math
 import random
 from time import sleep
-import pylab as pl
 import pathlib
 import os
 
